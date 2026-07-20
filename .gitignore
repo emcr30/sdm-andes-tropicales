@@ -1,0 +1,10 @@
+
+# datos pesados que NO deben ir a GitHub
+data/raw/*.tif
+data/raw/*.zip
+worldclim_raw/
+*.tif
+
+# archivos temporales de Colab
+.ipynb_checkpoints/
+__pycache__/
