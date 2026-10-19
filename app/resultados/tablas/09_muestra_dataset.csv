@@ -1,0 +1,19 @@
+especie,id_registro,fuente,decimalLatitude,decimalLongitude,x_km,y_km,id_celda,bio_2,bio_4,bio_13,elevation,presencia,estrategia_pseudo,bio_3,bio_15,bio_19,bio_18
+Xenoglaux loweryi,gbif:5299133942,GBIF,-5.75,-77.935,-1974.469,2907.36,11419,10.662,41.014,126.0,2367,1,presencia_real,,,,
+Xenoglaux loweryi,gbif:5336940671,GBIF,-5.7,-77.984,-1980.521,2912.26,11261,10.837,40.672,119.0,2022,1,presencia_real,,,,
+Xenoglaux loweryi,gbif:5541239074,GBIF,-5.683,-77.853,-1966.365,2915.808,11262,10.649,41.202,123.0,2152,1,presencia_real,,,,
+Xenoglaux loweryi,pseudo:aleatoria:0,Pseudoausencia,-4.958,-77.708,-1959.861,2997.441,9842,10.447,31.804,215.0,747,0,aleatoria,,,,
+Xenoglaux loweryi,pseudo:aleatoria:1,Pseudoausencia,-4.958,-77.458,-1932.315,3000.655,9845,10.366,33.42,220.0,238,0,aleatoria,,,,
+Xenoglaux loweryi,pseudo:aleatoria:2,Pseudoausencia,-5.875,-77.042,-1874.975,2904.973,11588,11.06,36.092,181.0,941,0,aleatoria,,,,
+Cinclodes palliatus,gbif:5568052054,GBIF,-10.615,-76.18,-1723.727,2386.227,20604,,,,4167,1,presencia_real,79.922,58.807,70.0,
+Cinclodes palliatus,gbif:5380029161,GBIF,-11.582,-76.263,-1720.828,2276.035,22341,,,,4758,1,presencia_real,78.272,74.909,36.0,
+Cinclodes palliatus,gbif:5309624204,GBIF,-10.55,-76.872,-1798.023,2385.474,20438,,,,4699,1,presencia_real,80.354,75.207,22.0,
+Cinclodes palliatus,pseudo:aleatoria:0,Pseudoausencia,-10.958,-77.208,-1828.46,2335.448,21224,,,,2905,0,aleatoria,77.974,139.642,0.0,
+Cinclodes palliatus,pseudo:aleatoria:1,Pseudoausencia,-11.958,-74.375,-1517.609,2253.621,23154,,,,3056,0,aleatoria,79.426,49.671,119.0,
+Cinclodes palliatus,pseudo:aleatoria:2,Pseudoausencia,-8.875,-78.208,-1962.482,2556.902,17262,,,,1825,0,aleatoria,87.079,111.615,4.0,
+Telmatobius macrostomus,inat:208003408,iNaturalist,-10.894,-76.246,-1727.346,2354.045,21078,,100.7,,4090,1,presencia_real,,,,433.0
+Telmatobius macrostomus,inat:100552159,iNaturalist,-11.141,-76.033,-1701.889,2328.544,21554,,103.833,,4095,1,presencia_real,,,,403.0
+Telmatobius macrostomus,inat:100552158,iNaturalist,-11.101,-76.129,-1712.527,2331.988,21553,,98.848,,4259,1,presencia_real,,,,441.0
+Telmatobius macrostomus,pseudo:aleatoria:0,Pseudoausencia,-10.208,-75.708,-1678.48,2437.353,19820,,54.313,,2244,0,aleatoria,,,,180.0
+Telmatobius macrostomus,pseudo:aleatoria:1,Pseudoausencia,-11.708,-76.208,-1713.51,2262.39,22658,,106.168,,4745,0,aleatoria,,,,463.0
+Telmatobius macrostomus,pseudo:aleatoria:2,Pseudoausencia,-11.042,-75.458,-1642.229,2346.098,21403,,72.118,,2214,0,aleatoria,,,,351.0

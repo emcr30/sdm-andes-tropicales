@@ -1,0 +1,46 @@
+{
+  "Xenoglaux_loweryi": {
+    "nombre": "Xenoglaux loweryi",
+    "nombre_comun": "Lechucita bigotona",
+    "modelo": "SVM",
+    "raster": "outputs/rasters/Xenoglaux_loweryi_SVM.tif",
+    "variables": [
+      "bio_2",
+      "bio_4",
+      "bio_13",
+      "elevation"
+    ],
+    "umbral": 0.5565375574712,
+    "n_presencias": 15,
+    "presencias_csv": "data/processed/Xenoglaux_loweryi_presencias_limpias.csv"
+  },
+  "Cinclodes_palliatus": {
+    "nombre": "Cinclodes palliatus",
+    "nombre_comun": "Churrete real",
+    "modelo": "SVM",
+    "raster": "outputs/rasters/Cinclodes_palliatus_SVM.tif",
+    "variables": [
+      "bio_3",
+      "bio_15",
+      "bio_19",
+      "elevation"
+    ],
+    "umbral": 0.582725187206776,
+    "n_presencias": 49,
+    "presencias_csv": "data/processed/Cinclodes_palliatus_presencias_limpias.csv"
+  },
+  "Telmatobius_macrostomus": {
+    "nombre": "Telmatobius macrostomus",
+    "nombre_comun": "Rana gigante de Junín",
+    "modelo": "RandomForest",
+    "raster": "outputs/rasters/Telmatobius_macrostomus_RandomForest.tif",
+    "variables": [
+      "bio_4",
+      "bio_18",
+      "elevation"
+    ],
+    "umbral": 0.47388888888888886,
+    "n_presencias": 23,
+    "presencias_csv": "data/processed/Telmatobius_macrostomus_presencias_limpias.csv"
+  }
+}

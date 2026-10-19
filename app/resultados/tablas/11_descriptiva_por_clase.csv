@@ -1,0 +1,23 @@
+Especie,Variable,Clase,Media,Desv. est.,Mín.,Máx.
+Xenoglaux loweryi,bio_2,Pseudoausencia (buffer),10.75,0.47,9.88,11.6
+Xenoglaux loweryi,bio_2,Presencia,10.52,0.32,9.98,11.02
+Xenoglaux loweryi,bio_4,Pseudoausencia (buffer),42.34,9.56,31.73,64.83
+Xenoglaux loweryi,bio_4,Presencia,40.46,1.49,37.81,43.72
+Xenoglaux loweryi,bio_13,Pseudoausencia (buffer),145.47,31.02,100.0,207.0
+Xenoglaux loweryi,bio_13,Presencia,128.0,8.22,119.0,146.0
+Xenoglaux loweryi,elevation,Pseudoausencia (buffer),1465.0,756.08,704.0,3036.0
+Xenoglaux loweryi,elevation,Presencia,2085.0,402.48,1022.0,2683.0
+Cinclodes palliatus,bio_3,Pseudoausencia (buffer),76.83,7.17,55.85,88.54
+Cinclodes palliatus,bio_3,Presencia,78.43,1.7,74.82,83.81
+Cinclodes palliatus,bio_15,Pseudoausencia (buffer),74.95,26.69,38.93,140.6
+Cinclodes palliatus,bio_15,Presencia,75.35,12.76,46.25,132.53
+Cinclodes palliatus,bio_19,Pseudoausencia (buffer),55.94,64.25,0.0,241.0
+Cinclodes palliatus,bio_19,Presencia,36.96,25.79,0.0,162.0
+Cinclodes palliatus,elevation,Pseudoausencia (buffer),2888.29,1575.32,122.0,4729.0
+Cinclodes palliatus,elevation,Presencia,4343.41,515.62,2234.0,4796.0
+Telmatobius macrostomus,bio_4,Pseudoausencia (buffer),84.42,16.01,58.74,117.57
+Telmatobius macrostomus,bio_4,Presencia,96.28,9.13,76.63,105.27
+Telmatobius macrostomus,bio_18,Pseudoausencia (buffer),399.48,70.08,221.0,479.0
+Telmatobius macrostomus,bio_18,Presencia,429.83,17.57,390.0,464.0
+Telmatobius macrostomus,elevation,Pseudoausencia (buffer),4240.13,368.92,3231.0,4735.0
+Telmatobius macrostomus,elevation,Presencia,4193.0,108.46,4082.0,4367.0

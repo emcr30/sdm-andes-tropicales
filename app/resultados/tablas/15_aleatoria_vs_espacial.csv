@@ -1,0 +1,13 @@
+especie,modelo,auc_roc_aleatorio,auc_roc_espacial,tss_opt_aleatorio,tss_opt_espacial,dif_auc_roc,dif_tss
+Cinclodes_palliatus,LightGBM,0.848,0.738,0.552,0.285,0.109,0.267
+Cinclodes_palliatus,MaxEnt,0.807,0.675,0.459,0.248,0.132,0.211
+Cinclodes_palliatus,RandomForest,0.848,0.744,0.521,0.32,0.105,0.201
+Cinclodes_palliatus,SVM,0.831,0.761,0.541,0.338,0.069,0.203
+Telmatobius_macrostomus,LightGBM,0.937,0.929,0.745,0.762,0.008,-0.017
+Telmatobius_macrostomus,MaxEnt,0.874,0.852,0.705,0.558,0.021,0.147
+Telmatobius_macrostomus,RandomForest,0.94,0.95,0.74,0.799,-0.01,-0.059
+Telmatobius_macrostomus,SVM,0.925,0.917,0.745,0.625,0.008,0.12
+Xenoglaux_loweryi,LightGBM,0.822,0.704,0.567,0.472,0.118,0.094
+Xenoglaux_loweryi,MaxEnt,0.817,0.702,0.6,0.321,0.115,0.279
+Xenoglaux_loweryi,RandomForest,0.861,0.803,0.567,0.439,0.058,0.128
+Xenoglaux_loweryi,SVM,0.878,0.893,0.633,0.522,-0.015,0.111

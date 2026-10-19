@@ -1,0 +1,4 @@
+Especie,Mejor modelo,Puesto promedio RandomForest,Puesto promedio SVM,Puesto promedio LightGBM,Puesto promedio MaxEnt
+Cinclodes palliatus,SVM,2.0,1.67,2.67,3.67
+Telmatobius macrostomus,RandomForest,1.5,2.67,1.83,4.0
+Xenoglaux loweryi,SVM,2.33,1.0,2.92,3.75

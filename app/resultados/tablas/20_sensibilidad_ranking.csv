@@ -1,0 +1,7 @@
+Especie,Estrategia,Mejor con config. inicial,Mejor según la mediana de la grilla,Mejor según el máximo de la grilla,¿Cambia con la mediana?
+Cinclodes palliatus,aleatoria,RandomForest,RandomForest,SVM,No
+Cinclodes palliatus,buffer,SVM,SVM,SVM,No
+Telmatobius macrostomus,aleatoria,LightGBM,LightGBM,LightGBM,No
+Telmatobius macrostomus,buffer,RandomForest,RandomForest,LightGBM,No
+Xenoglaux loweryi,aleatoria,SVM,RandomForest,SVM,Sí
+Xenoglaux loweryi,buffer,SVM,RandomForest,SVM,Sí

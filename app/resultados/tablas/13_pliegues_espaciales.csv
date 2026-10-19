@@ -1,0 +1,10 @@
+Especie,Estrategia,Presencias,Pseudoausencias,Rango estimado (km),Tamaño de bloque usado (km),Bloques con datos,k usado
+Xenoglaux loweryi,aleatoria,15,15,126,16.8,22,3
+Xenoglaux loweryi,buffer,15,15,126,39.9,12,3
+Xenoglaux loweryi,ambiental,15,15,126,16.8,15,3
+Cinclodes palliatus,aleatoria,49,49,238,133.8,13,5
+Cinclodes palliatus,buffer,49,49,238,178.4,8,4
+Cinclodes palliatus,ambiental,49,49,238,178.4,6,3
+Telmatobius macrostomus,aleatoria,23,23,124,16.5,30,3
+Telmatobius macrostomus,buffer,23,23,124,22.0,20,3
+Telmatobius macrostomus,ambiental,23,23,124,29.4,15,3

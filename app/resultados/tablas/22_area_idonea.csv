@@ -1,0 +1,13 @@
+Especie,Modelo,Umbral (máx. TSS),% de M idóneo,% del Perú idóneo,% del Perú con prob. > 0.5
+Xenoglaux loweryi,RandomForest,0.527,10.42,0.72,0.78
+Xenoglaux loweryi,SVM,0.557,10.95,0.4,0.55
+Xenoglaux loweryi,LightGBM,0.5,29.15,11.02,11.02
+Xenoglaux loweryi,MaxEnt,0.893,18.02,1.9,4.1
+Cinclodes palliatus,RandomForest,0.498,20.75,6.3,6.19
+Cinclodes palliatus,SVM,0.583,23.91,4.43,6.44
+Cinclodes palliatus,LightGBM,0.5,29.87,7.03,7.03
+Cinclodes palliatus,MaxEnt,0.488,26.49,4.45,4.25
+Telmatobius macrostomus,RandomForest,0.474,9.18,9.22,8.97
+Telmatobius macrostomus,SVM,0.501,9.69,0.57,0.57
+Telmatobius macrostomus,LightGBM,0.5,26.7,25.5,25.5
+Telmatobius macrostomus,MaxEnt,0.864,11.05,53.43,55.16

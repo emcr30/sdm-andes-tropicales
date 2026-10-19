@@ -1,0 +1,7 @@
+# La app necesita sus mapas GeoTIFF (pequeños), aunque la raíz del repo ignore *.tif
+!*.tif
+__pycache__/
+.venv/
+.DS_Store
+# Rangos de la UICN / BirdLife: sus términos no permiten redistribuirlos
+capas/rangos/

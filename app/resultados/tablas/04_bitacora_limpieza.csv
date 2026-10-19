@@ -1,0 +1,34 @@
+Especie,Paso,Registros,GBIF,iNaturalist
+Xenoglaux loweryi,1. Registros descargados,938,917,21
+Xenoglaux loweryi,2. Coordenadas válidas,938,917,21
+Xenoglaux loweryi,3. Años 1980-2024,938,917,21
+Xenoglaux loweryi,4. Sin fósiles ni ejemplares en cautiverio,938,917,21
+Xenoglaux loweryi,5. Incertidumbre ≤ 10 km (o no informada),919,902,17
+Xenoglaux loweryi,6. Filtro de coordenadas oscurecidas de iNaturalist,902,902,0
+Xenoglaux loweryi,7. Dentro del territorio peruano,902,902,0
+Xenoglaux loweryi,8. Con datos ambientales,902,902,0
+Xenoglaux loweryi,"9. Sin duplicados (coordenadas a 4 decimales, ~11 m)",132,132,0
+Xenoglaux loweryi,10. Elevación coherente con la especie,132,132,0
+Xenoglaux loweryi,12. Distancia mínima de 5 km (corrección b),15,15,0
+Cinclodes palliatus,1. Registros descargados,1064,1037,27
+Cinclodes palliatus,2. Coordenadas válidas,1064,1037,27
+Cinclodes palliatus,3. Años 1980-2024,1064,1037,27
+Cinclodes palliatus,4. Sin fósiles ni ejemplares en cautiverio,1064,1037,27
+Cinclodes palliatus,5. Incertidumbre ≤ 10 km (o no informada),1039,1015,24
+Cinclodes palliatus,6. Filtro de coordenadas oscurecidas de iNaturalist,1015,1015,0
+Cinclodes palliatus,7. Dentro del territorio peruano,1015,1015,0
+Cinclodes palliatus,8. Con datos ambientales,1015,1015,0
+Cinclodes palliatus,"9. Sin duplicados (coordenadas a 4 decimales, ~11 m)",273,273,0
+Cinclodes palliatus,10. Elevación coherente con la especie,273,273,0
+Cinclodes palliatus,12. Distancia mínima de 5 km (corrección b),49,49,0
+Telmatobius macrostomus,1. Registros descargados,43,4,39
+Telmatobius macrostomus,2. Coordenadas válidas,43,4,39
+Telmatobius macrostomus,3. Años 1980-2024,43,4,39
+Telmatobius macrostomus,4. Sin fósiles ni ejemplares en cautiverio,43,4,39
+Telmatobius macrostomus,5. Incertidumbre ≤ 10 km (o no informada),41,2,39
+Telmatobius macrostomus,6. Filtro de coordenadas oscurecidas de iNaturalist,41,2,39
+Telmatobius macrostomus,7. Dentro del territorio peruano,41,2,39
+Telmatobius macrostomus,8. Con datos ambientales,41,2,39
+Telmatobius macrostomus,"9. Sin duplicados (coordenadas a 4 decimales, ~11 m)",40,1,39
+Telmatobius macrostomus,10. Elevación coherente con la especie,40,1,39
+Telmatobius macrostomus,12. Distancia mínima de 5 km (corrección b),23,0,23

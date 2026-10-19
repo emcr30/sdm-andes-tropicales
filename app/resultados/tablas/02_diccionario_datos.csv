@@ -1,0 +1,38 @@
+Campo,Fuente,Tipo de dato,Tipo en pandas,Unidad,Descripción,Uso en el modelo,Formato,Mínimo (Perú),Máximo (Perú)
+gbifID,GBIF,Identificador (entero),int64,-,Identificador único del registro en GBIF,Trazabilidad,CSV,,
+id,iNaturalist,Identificador (entero),int64,-,Identificador único de la observación,Trazabilidad,CSV,,
+species,Ambas,Categórico (texto),object,-,Nombre científico de la especie,Etiqueta de especie,CSV,,
+decimalLatitude,Ambas,Numérico continuo (coordenada),float64,grados WGS84,Latitud del registro,Sí: ubicación de la presencia,CSV,,
+decimalLongitude,Ambas,Numérico continuo (coordenada),float64,grados WGS84,Longitud del registro,Sí: ubicación de la presencia,CSV,,
+coordinateUncertaintyInMeters,GBIF,Numérico continuo,float64,m,Radio de incertidumbre de la coordenada,Filtro de calidad,CSV,,
+positional_accuracy,iNaturalist,Numérico continuo,float64,m,Precisión de la ubicación informada por el usuario,Descriptivo,CSV,,
+obscured,iNaturalist,Booleano,bool,-,Coordenada desplazada para proteger especies amenazadas,Filtro de calidad,CSV,,
+geoprivacy / taxon_geoprivacy,iNaturalist,Categórico,object,-,Nivel de privacidad de la ubicación,Descriptivo,CSV,,
+eventDate / observed_on,Ambas,Fecha (texto ISO 8601),object,-,Fecha de la observación,Descriptivo,CSV,,
+year,Ambas,Numérico discreto,int64,año,Año de la observación,Filtro temporal 1980-2024,CSV,,
+basisOfRecord,GBIF,Categórico,object,-,"Tipo de registro (observación humana, espécimen, fósil, etc.)",Filtro de calidad,CSV,,
+countryCode,GBIF,Categórico,object,ISO 3166,País del registro,Filtro geográfico,CSV,,
+institutionCode / datasetName,GBIF,Categórico (texto),object,-,Institución y conjunto de datos de origen,Descriptivo,CSV,,
+occurrenceStatus,GBIF,Categórico,object,-,Presente o ausente,Filtro (solo presentes),CSV,,
+issues,GBIF,Texto (lista),object,-,Advertencias de calidad de GBIF,Descriptivo,CSV,,
+quality_grade,iNaturalist,Categórico,object,-,Grado de calidad (solo 'research'),Filtro de calidad,CSV,,
+bio_1,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura media anual,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-3.29,27.18
+bio_2,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Rango diurno medio (media mensual de máx. − mín.),Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),5.98,19.27
+bio_3,WorldClim v2.1,Numérico continuo (ráster),float32,%,Isotermalidad (bio_2 / bio_7 × 100),Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),45.54,91.85
+bio_4,WorldClim v2.1,Numérico continuo (ráster),float32,°C × 100,Estacionalidad de la temperatura (desviación estándar × 100),Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),10.93,301.92
+bio_5,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura máxima del mes más cálido,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),5.71,33.49
+bio_6,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura mínima del mes más frío,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-15.46,21.72
+bio_7,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Rango anual de temperatura (bio_5 − bio_6),Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),9.7,27.1
+bio_8,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura media del trimestre más lluvioso,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-1.56,27.35
+bio_9,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura media del trimestre más seco,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-5.94,26.9
+bio_10,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura media del trimestre más cálido,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-1.52,27.58
+bio_11,WorldClim v2.1,Numérico continuo (ráster),float32,°C,Temperatura media del trimestre más frío,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-5.94,26.79
+bio_12,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación anual,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,6070.0
+bio_13,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del mes más lluvioso,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,936.0
+bio_14,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del mes más seco,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,283.0
+bio_15,WorldClim v2.1,Numérico continuo (ráster),float32,%,Estacionalidad de la precipitación (coeficiente de variación),Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,204.61
+bio_16,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del trimestre más lluvioso,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,2480.0
+bio_17,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del trimestre más seco,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,861.0
+bio_18,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del trimestre más cálido,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,1781.0
+bio_19,WorldClim v2.1,Numérico continuo (ráster),float32,mm,Precipitación del trimestre más frío,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),0.0,1493.0
+elevation,WorldClim v2.1,Numérico continuo (ráster),float32,m s. n. m.,Elevación,Candidata a predictora (ver 3.4),GeoTIFF 5' (~9 km),-13.0,5655.0

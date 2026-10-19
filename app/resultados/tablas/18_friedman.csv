@@ -1,0 +1,5 @@
+Estrategia,Métrica,Estadístico,p-valor
+aleatoria,AUC-ROC,6.692,0.082
+aleatoria,TSS (umbral máx. TSS),5.069,0.167
+buffer,AUC-ROC,5.4,0.145
+buffer,TSS (umbral máx. TSS),3.0,0.392

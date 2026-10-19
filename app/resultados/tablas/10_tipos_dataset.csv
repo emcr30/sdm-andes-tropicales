@@ -1,0 +1,19 @@
+Columna,Tipo en pandas,Rol,Descripción
+especie,object,Identificación / control,Nombre científico
+id_registro,object,Identificación / control,"Identificador de origen (gbif:, inat: o pseudo:)"
+fuente,object,Identificación / control,"GBIF, iNaturalist o Pseudoausencia"
+decimalLatitude,float64,Identificación / control,Latitud (grados WGS84)
+decimalLongitude,float64,Identificación / control,Longitud (grados WGS84)
+x_km,float64,Agrupación espacial,"Coordenada X proyectada (km, ESRI:102033)"
+y_km,float64,Agrupación espacial,"Coordenada Y proyectada (km, ESRI:102033)"
+id_celda,int64,Identificación / control,Celda del ráster (fila × ancho + columna)
+bio_2,float64,Predictora,Rango diurno medio (media mensual de máx. − mín.) (°C)
+bio_4,float64,Predictora,Estacionalidad de la temperatura (desviación estándar × 100) (°C × 100)
+bio_13,float64,Predictora,Precipitación del mes más lluvioso (mm)
+elevation,float64,Predictora,Elevación (m s. n. m.)
+presencia,int64,Clase objetivo,"Clase objetivo: 1 presencia, 0 pseudoausencia"
+estrategia_pseudo,object,Identificación / control,"presencia_real, aleatoria, buffer o ambiental"
+bio_3,float64,Predictora,Isotermalidad (bio_2 / bio_7 × 100) (%)
+bio_15,float64,Predictora,Estacionalidad de la precipitación (coeficiente de variación) (%)
+bio_19,float64,Predictora,Precipitación del trimestre más frío (mm)
+bio_18,float64,Predictora,Precipitación del trimestre más cálido (mm)

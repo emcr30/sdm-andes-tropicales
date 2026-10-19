@@ -1,0 +1,12 @@
+Especie,Modelo,Variable,Caída media de AUC-ROC,Desv. est.
+Xenoglaux loweryi,SVM,bio_13,0.1135,0.1788
+Xenoglaux loweryi,SVM,elevation,0.1089,0.1041
+Xenoglaux loweryi,SVM,bio_4,0.0644,0.1695
+Xenoglaux loweryi,SVM,bio_2,0.0456,0.1241
+Cinclodes palliatus,SVM,elevation,0.0908,0.1614
+Cinclodes palliatus,SVM,bio_3,0.0545,0.0817
+Cinclodes palliatus,SVM,bio_19,0.0473,0.0665
+Cinclodes palliatus,SVM,bio_15,0.025,0.0781
+Telmatobius macrostomus,RandomForest,elevation,0.2094,0.1256
+Telmatobius macrostomus,RandomForest,bio_4,0.135,0.109
+Telmatobius macrostomus,RandomForest,bio_18,0.0807,0.0946

@@ -1,0 +1,6 @@
+Negocio,Datos,Datos limpios
+"Comparar Random Forest, MaxEnt, SVM y LightGBM en la distribución de especies endémicas andinas (objetivo general)","Registros de presencia de GBIF e iNaturalist: 938 (X. loweryi), 1064 (C. palliatus), 43 (T. macrostomus)","15, 49, 23 presencias, sin duplicados, con una presencia por celda, separadas al menos 5 km y con elevación coherente"
+Contar con variables ambientales representativas y no redundantes,"WorldClim v2.1: 19 bioclimáticas + elevación (5 min, 15,316 celdas válidas en el Perú)","4, 4, 3 variables por especie, tras filtrar Pearson ≥ 0.7 y VIF ≥ 5 en el fondo de M"
+Disponer de clase negativa para entrenar con datos solo de presencia,Presencias depuradas y área accesible M (radio de 100 km dentro del Perú),"Pseudoausencias 1:1 (aleatoria, buffer, ambiental): conjuntos de 30, 98, 46 registros"
+Evaluar sin sobreestimar el rendimiento,Conjuntos de datos por especie y estrategia,"Validación cruzada espacial por bloques (k = 3, 4, 3)"
+Mostrar los resultados de forma simple,Modelos entrenados y capas ráster,"Mapa GeoTIFF por especie y modelo recortado al Perú, para visualizar en Streamlit"
