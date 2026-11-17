@@ -56,29 +56,38 @@ with ctrl:
             ver_zonas = st.checkbox("Zonas predichas sin registros", value=True, key="ver_zonas",
                                     help="Manchas idóneas (sobre el umbral) donde todavía no hay ninguna presencia: "
                                          "lugares donde el modelo predice que la especie podría estar.")
-            ver_fuera = st.checkbox("Incluir zonas fuera de M", key="ver_fuera", disabled=not ver_zonas,
-                                    help="Fuera del área accesible el modelo extrapola a climas que no comparó. "
-                                         "Esas zonas se muestran atenuadas y son hipótesis débiles.")
+            restringir = st.checkbox("Solo lo que la especie puede alcanzar", value=True, key="restringir",
+                                     help="Restricción a posteriori (Barve et al. 2011; Mendes et al. 2020): la predicción "
+                                          "se limita al área alcanzable y el clima adecuado fuera de ella queda en gris. "
+                                          "Desactívala para ver la idoneidad climática sin restricción.")
             ver_anp = st.checkbox("Áreas naturales protegidas", key="ver_anp", disabled=D.anp() is None)
             ver_rango = st.checkbox("Rango conocido (UICN / BirdLife)", key=f"ver_rango_{esp}") if D.rango(esp) else False
 
     r = D.resumen_umbral(esp, modelo, umbral)
-    zonas = D.zonas_predichas(esp, modelo, umbral)
-    candidatas = zonas[~zonas["con_registros"] & (zonas["dentro_m"] | ver_fuera)]
+    zonas = D.zonas_predichas(esp, modelo, umbral, restringir)
+    candidatas = zonas[~zonas["con_registros"]]
     nuevas = candidatas.head(C.MAX_ZONAS).reset_index(drop=True)
     conocidas = zonas[zonas["con_registros"]]
     ui.espacio()
     with st.container(key="panel-resultado"):
-        ui.cifra(f"{ui.fmt_km2(r['km2_m'])} km²", f"idóneos dentro de M, el {r['pct_m']:.1f} % de su superficie")
-        ui.espacio()
-        ui.cifra(f"{r['pct_peru']:.1f} %", f"del Perú queda como idóneo ({ui.fmt_km2(r['km2_peru'])} km²), incluso fuera de M")
+        if restringir:
+            pct_alc = 100 * r["km2_alc"] / r["km2_total_alc"] if r["km2_total_alc"] else 0.0
+            ui.cifra(f"{ui.fmt_km2(r['km2_alc'])} km²", f"idóneos en el área que la especie puede alcanzar, el {pct_alc:.1f} % de ella")
+            ui.espacio()
+            ui.cifra(f"{r['pct_peru']:.1f} %", f"del Perú tiene clima adecuado ({ui.fmt_km2(r['km2_peru'])} km²), "
+                                               "pero la especie no llega a la mayor parte")
+            ui.nota(C.ALCANZABLE.get(esp, C.TEXTO_ALCANZABLE_M))
+        else:
+            ui.cifra(f"{ui.fmt_km2(r['km2_m'])} km²", f"idóneos dentro de M, el {r['pct_m']:.1f} % de su superficie")
+            ui.espacio()
+            ui.cifra(f"{r['pct_peru']:.1f} %", f"del Perú queda como idóneo ({ui.fmt_km2(r['km2_peru'])} km²), incluso fuera de M")
         en_anp = D.idoneo_en_anp(esp, modelo, umbral) if ver_anp else None
         if en_anp is not None:
             ui.nota(f"De lo idóneo dentro de M, el {en_anp['pct']:.0f} % ({ui.fmt_km2(en_anp['km2'])} km²) cae en un área natural protegida.")
 
 with mapa_col:
     ui.grafico(G.mapa_idoneidad(esp, modelo, umbral, vista == "binaria", extension, anp=ver_anp, rango=ver_rango,
-                                dptos=ver_dptos, zonas=nuevas if ver_zonas else None),
+                                dptos=ver_dptos, zonas=nuevas if ver_zonas else None, restringir=restringir),
                key="mapa_principal")
     if vista == "binaria":
         ui.leyenda([("barra", VERDE_IDONEO, f"Idóneo (≥ {umbral:.3f})"), ("punto", T["ink"], "Presencia")])
@@ -86,6 +95,10 @@ with mapa_col:
         '<p class="sdm-leyenda" style="margin-top:6px">'
         f'<span><b style="background:transparent;border-top:2px dotted {T["ink"]};height:0;border-radius:0"></b>'
         "Límite del área accesible M: fuera de ella el modelo extrapola</span>"
+        + (f'<span><b style="background:transparent;border-top:2px solid {T["ink"]};height:0;border-radius:0"></b>'
+           "Área alcanzable: subcuencas con registros</span>" if D.alcanzable_geojson(esp) else "")
+        + (f'<span><b style="background:{G.GRIS_INALCANZABLE}"></b>Clima adecuado, pero fuera del alcance de la especie</span>'
+           if restringir else "")
         + ('<span><b style="background:transparent;border-top:1px solid rgba(15,26,20,0.42);height:0;border-radius:0"></b>'
            "Límite departamental</span>" if ver_dptos else "")
         + (f'<span><i style="background:{T["bg"]};box-shadow:inset 0 0 0 2px {T["accent"]}"></i>'
@@ -109,8 +122,7 @@ z1, z2 = st.columns([1.4, 1], gap="large")
 with z1:
     st.html('<p class="sdm-head" style="font-size:1.375rem">Zonas predichas sin registros</p>')
     if nuevas.empty:
-        ui.nota("Con este umbral no quedan manchas idóneas sin registros dentro de M. Baja el umbral o incluye las zonas "
-                "fuera de M para ver más candidatas.")
+        ui.nota("Con este umbral no quedan manchas idóneas sin registros en el área alcanzable. Baja el umbral para ver más candidatas.")
     else:
         tabla_z = nuevas.assign(**{
             "N.º": range(1, len(nuevas) + 1),
@@ -121,15 +133,13 @@ with z1:
             "Ubicación": nuevas["dentro_m"].map({True: "Dentro de M", False: "Fuera de M (extrapola)"}),
         })[["N.º", "Departamento", "Superficie (km²)", "Idoneidad máx.", "Lat", "Lon", "Ubicación"]]
         st.dataframe(tabla_z, hide_index=True, width="stretch", height=min(38 * len(tabla_z) + 40, 420))
-        fuera = int((~zonas["con_registros"] & ~zonas["dentro_m"]).sum())
         ui.nota(f"{len(candidatas)} zonas candidatas"
                 + (f" (aquí las {C.MAX_ZONAS} más grandes)" if len(candidatas) > C.MAX_ZONAS else "")
-                + f" y {len(conocidas)} que ya tienen registros"
-                + (f"; {fuera} más fuera de M quedan ocultas" if fuera and not ver_fuera else "") + ". Lat/Lon es la celda de mayor idoneidad "
+                + f" y {len(conocidas)} que ya tienen registros. Lat/Lon es la celda de mayor idoneidad "
                 f"de cada zona. Solo se cuentan manchas de {C.MIN_CELDAS_ZONA} celdas o más (unos {C.MIN_CELDAS_ZONA * 85} km²).")
 with z2:
     st.html('<p class="sdm-head" style="font-size:1.375rem">Superficie idónea por departamento</p>')
-    por_d = D.idoneo_por_departamento(esp, modelo, umbral)
+    por_d = D.idoneo_por_departamento(esp, modelo, umbral, restringir)
     if por_d.empty:
         ui.nota("Falta la capa de departamentos (capas/departamentos_peru.geojson).")
     else:
@@ -153,8 +163,8 @@ with l2:
             "predice sobre climas que nunca comparó, por eso una mancha verde lejos de las presencias es una hipótesis, no un hallazgo.</p>")
 with l3:
     st.html('<p class="sdm-head" style="font-size:1.375rem">Qué no dice el mapa</p>')
-    st.html('<p class="sdm-body" style="margin-top:10px">No incluye cobertura de bosque, ríos ni barreras. Un lugar puede tener el clima '
-            "adecuado y estar deforestado o fuera del alcance de la especie.</p>")
+    st.html('<p class="sdm-body" style="margin-top:10px">No incluye cobertura de bosque ni calidad del agua. La barrera de dispersión '
+            "solo entra como área alcanzable: un lugar puede tener el clima adecuado y estar deforestado o contaminado.</p>")
 
 # ---------- comparación ----------
 ui.seccion()
@@ -173,7 +183,7 @@ for col, m in zip(fila1 + fila2, C.MODELOS):
             st.html(f'<p class="sdm-body" style="font-weight:600">{C.NOMBRE_MODELO[m]}'
                     f'<span style="color:var(--muted);font-weight:400"> · umbral {umbrales[m]:.2f}'
                     f'{" · mejor modelo" if m == mejor else ""}</span></p>')
-            ui.grafico(G.mini_mapa(esp, m, umbrales[m], vista == "binaria"), key=f"mini_{m}")
+            ui.grafico(G.mini_mapa(esp, m, umbrales[m], vista == "binaria", restringir), key=f"mini_{m}")
 ui.espacio()
 a1, a2 = st.columns([1, 1.4], gap="large")
 with a1:

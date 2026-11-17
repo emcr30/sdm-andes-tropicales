@@ -83,6 +83,14 @@ La página Mapa también muestra la **predicción de dónde podría estar la esp
 "Zonas predichas sin registros", junto con la superficie idónea por departamento. Por defecto solo aparecen las zonas
 dentro de M; la casilla "Incluir zonas fuera de M" agrega las extrapoladas, atenuadas.
 
+**Restricción a lo que la especie puede alcanzar** (casilla "Solo lo que la especie puede alcanzar", encendida por defecto).
+El modelo solo compara clima y marca como idóneos lugares a los que la especie no llega. Siguiendo a Barve et al. (2011,
+*Ecological Modelling* 222: 1810–1819) y Mendes et al. (2020, *Ecological Modelling* 431: 109180), la predicción se recorta
+*a posteriori* al área alcanzable y el clima adecuado fuera de ella se pinta en gris. Para las aves el área alcanzable es M;
+para *Telmatobius macrostomus*, completamente acuática, son las subcuencas con registros
+(`capas/alcanzable/Telmatobius_macrostomus.geojson`, HydroBASINS nivel 8, Lehner y Grill 2013, licencia CC BY 4.0).
+Para restringir otra especie, agrega `capas/alcanzable/<Especie>.geojson` y su texto en `ALCANZABLE` (`sdm/config.py`).
+
 Además hay dos casillas, apagadas por defecto:
 
 - **Áreas naturales protegidas**: `capas/anp_sernanp.geojson`, descargado del geoservidor del SERNANP
