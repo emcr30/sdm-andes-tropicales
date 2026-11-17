@@ -93,36 +93,85 @@ def _capa_rango(fig, esp):
                              name="Rango conocido", showlegend=False))
 
 
+def _capa_departamentos(fig, ext, tam: int = 11, etiquetas: bool = True):
+    """Límites departamentales en línea fina y, si caben en el encuadre, sus nombres."""
+    gj = D.departamentos()
+    if gj is None:
+        return
+    xs, ys, _ = _anillos(gj)
+    fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color="rgba(15,26,20,0.42)", width=0.8),
+                             hoverinfo="skip", name="Departamentos", showlegend=False))
+    if not etiquetas:
+        return
+    x0, x1, y0, y1 = ext
+    mx, my = 0.06 * (x1 - x0), 0.04 * (y1 - y0)  # sin rótulos pegados al borde del encuadre
+    ancho = x1 - x0 > 6  # en la vista de todo el Perú el Callao no cabe junto a Lima
+    for f in gj["features"]:
+        pr = f["properties"]
+        if ancho and pr["nombre"] == "Callao":
+            continue
+        if x0 + mx <= pr["lon"] <= x1 - mx and y0 + my <= pr["lat"] <= y1 - my:
+            fig.add_annotation(x=pr["lon"], y=pr["lat"], text=pr["nombre"].upper(), showarrow=False,
+                               font=dict(size=tam, color=T["muted"]), bgcolor="rgba(247,247,244,0.55)", borderpad=1)
+
+
+def _zonas_predichas(fig, zonas: pd.DataFrame):
+    """Zonas idóneas sin registros conocidos, numeradas como en la tabla: dónde podría estar la especie.
+
+    Las que caen fuera de M se dibujan atenuadas: ahí el modelo extrapola."""
+    z = zonas
+    if z.empty:
+        return
+    tam = 12 + 14 * np.sqrt(z["km2"] / z["km2"].max())
+    fig.add_trace(go.Scatter(
+        x=z["lon"], y=z["lat"], mode="markers+text", text=[str(i) for i in range(1, len(z) + 1)],
+        textposition="middle center", textfont=dict(size=10, color=T["accent"]),
+        marker=dict(size=tam, color="rgba(247,247,244,0.85)", line=dict(color=T["accent"], width=2),
+                    opacity=np.where(z["dentro_m"], 1.0, 0.5)),
+        customdata=np.stack([z["departamento"], z["km2"].round(0), z["idoneidad_max"],
+                             np.where(z["dentro_m"], "dentro de M", "fuera de M: extrapolación")], axis=-1),
+        hovertemplate="<b>Zona predicha sin registros</b><br>%{customdata[0]}<br>%{customdata[1]:,.0f} km² idóneos"
+                      " · idoneidad máx. %{customdata[2]:.2f}<br>%{customdata[3]}<extra></extra>",
+        name="Zonas predichas", showlegend=False))
+
+
 def mapa_idoneidad(esp: str, modelo: str, umbral: float, binario: bool, vista: str, alto: int = 640,
-                   anp: bool = False, rango: bool = False):
+                   anp: bool = False, rango: bool = False, dptos: bool = True, zonas: pd.DataFrame | None = None):
     g = D.grilla()
     mapa = D.idoneidad(esp, modelo)
     fig = go.Figure()
     elev = _capa_relieve(fig)
     elev_c = np.where(np.isfinite(elev), elev, np.nan) if elev is not None else np.full_like(mapa, np.nan)
+    nom = D.nombres_departamento_grilla()
+    nom = nom if nom is not None else np.full(mapa.shape, "", dtype=object)
     if binario:
         z = np.where(np.isfinite(mapa), (mapa >= umbral).astype(float), np.nan)
         z = np.where(z > 0, 1.0, np.nan)
         fig.add_trace(go.Heatmap(z=z, x=g.lon, y=g.lat, colorscale=[[0, VERDE_IDONEO], [1, VERDE_IDONEO]], showscale=False,
-                                 customdata=np.dstack([mapa, elev_c]),
-                                 hovertemplate="Idóneo · idoneidad %{customdata[0]:.2f}<br>Elevación %{customdata[1]:,.0f} m"
+                                 customdata=np.dstack([mapa.astype(object), elev_c.astype(object), nom]),
+                                 hovertemplate="<b>%{customdata[2]}</b><br>Idóneo · idoneidad %{customdata[0]:.2f}"
+                                               "<br>Elevación %{customdata[1]:,.0f} m"
                                                "<br>Lat %{y:.2f}° · Lon %{x:.2f}°<extra></extra>", name="idóneo"))
     else:
         fig.add_trace(go.Heatmap(z=mapa, x=g.lon, y=g.lat, colorscale=RAMPA_IDONEIDAD, zmin=0, zmax=1,
-                                 customdata=elev_c,
+                                 customdata=np.dstack([elev_c.astype(object), nom]),
                                  colorbar=dict(title=dict(text="Idoneidad", side="top", font=dict(size=12, color=T["muted"])),
                                                orientation="h", x=0, xanchor="left", y=-0.02, yanchor="top", len=0.45,
                                                thickness=10, outlinewidth=0, tickvals=[0, 0.25, 0.5, 0.75, 1],
                                                tickfont=dict(size=11, color=T["muted"])),
-                                 hovertemplate="Idoneidad %{z:.2f}<br>Elevación %{customdata:,.0f} m"
+                                 hovertemplate="<b>%{customdata[1]}</b><br>Idoneidad %{z:.2f}<br>Elevación %{customdata[0]:,.0f} m"
                                                "<br>Lat %{y:.2f}° · Lon %{x:.2f}°<extra></extra>", name="idoneidad"))
+    ext = D.extension(D.area_m(esp), 0.9) if vista == "M" else D.extension(g.peru, 0.3)
+    if dptos:
+        _capa_departamentos(fig, ext, tam=11 if vista == "M" else 9)
     if anp:
         _capa_anp(fig)
     if rango:
         _capa_rango(fig, esp)
     _contorno_m(fig, esp)
+    if zonas is not None:
+        _zonas_predichas(fig, zonas)
     _presencias(fig, esp, size=9)
-    ext = D.extension(D.area_m(esp), 0.9) if vista == "M" else D.extension(g.peru, 0.3)
     _ejes_geo(fig, ext)
     fig.update_layout(height=alto, margin=dict(l=0, r=0, t=0, b=36 if not binario else 0), showlegend=False)
     return fig
@@ -139,9 +188,11 @@ def mini_mapa(esp: str, modelo: str, umbral: float, binario: bool):
     else:
         fig.add_trace(go.Heatmap(z=mapa, x=g.lon, y=g.lat, colorscale=RAMPA_IDONEIDAD, zmin=0, zmax=1, showscale=False,
                                  hovertemplate="%{z:.2f}<extra></extra>"))
+    ext = D.extension(D.area_m(esp), 0.9)
+    _capa_departamentos(fig, ext, tam=9)
     _contorno_m(fig, esp)
     _presencias(fig, esp, size=5)
-    _ejes_geo(fig, D.extension(D.area_m(esp), 0.9), ticks=False)
+    _ejes_geo(fig, ext, ticks=False)
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)
     return fig
 
@@ -151,6 +202,8 @@ def mapa_portada(alto: int = 620):
     g = D.grilla()
     fig = go.Figure()
     _capa_relieve(fig)
+    ext = D.extension(g.peru, 0.25)
+    _capa_departamentos(fig, ext, tam=9)
     anot = []
     for esp, info in C.ESPECIES.items():
         p = D.presencias(esp)
@@ -175,7 +228,7 @@ def mapa_portada(alto: int = 620):
                            arrowhead=0, arrowwidth=1.2, arrowcolor=T["ink"], font=dict(size=13, color=T["ink"]),
                            align="center", xanchor="center", axref="x", ayref="y", bgcolor="rgba(242,243,239,0.92)",
                            borderpad=6, **pos[esp])
-    _ejes_geo(fig, D.extension(g.peru, 0.25), ticks=False)
+    _ejes_geo(fig, ext, ticks=False)
     fig.update_layout(height=alto, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)
     return fig
 
@@ -236,6 +289,8 @@ def mapa_puntos(esp: str, estrategia: str | None):
     """Presencias y, opcionalmente, las pseudoausencias de una estrategia."""
     fig = go.Figure()
     _capa_relieve(fig)
+    ext = D.extension(D.area_m(esp), 0.6)
+    _capa_departamentos(fig, ext, tam=10)
     _contorno_m(fig, esp)
     if estrategia:
         d = D.dataset(esp)
@@ -245,7 +300,7 @@ def mapa_puntos(esp: str, estrategia: str | None):
                                  hovertemplate=f"Pseudoausencia ({C.ESTRATEGIAS[estrategia].lower()})<br>Lat %{{y:.2f}}° · Lon %{{x:.2f}}°<extra></extra>",
                                  showlegend=False))
     _presencias(fig, esp, size=9)
-    _ejes_geo(fig, D.extension(D.area_m(esp), 0.6))
+    _ejes_geo(fig, ext)
     fig.update_layout(height=520, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)
     return fig
 

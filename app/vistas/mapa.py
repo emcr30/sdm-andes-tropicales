@@ -52,10 +52,21 @@ with ctrl:
                                   format_func={"M": "Área accesible", "Perú": "Todo el Perú"}.get)
         with st.container(key="capas"):
             st.html('<p class="sdm-note" style="margin-top:6px">Capas de referencia</p>')
+            ver_dptos = st.checkbox("Departamentos", value=True, key="ver_dptos", disabled=D.departamentos() is None)
+            ver_zonas = st.checkbox("Zonas predichas sin registros", value=True, key="ver_zonas",
+                                    help="Manchas idóneas (sobre el umbral) donde todavía no hay ninguna presencia: "
+                                         "lugares donde el modelo predice que la especie podría estar.")
+            ver_fuera = st.checkbox("Incluir zonas fuera de M", key="ver_fuera", disabled=not ver_zonas,
+                                    help="Fuera del área accesible el modelo extrapola a climas que no comparó. "
+                                         "Esas zonas se muestran atenuadas y son hipótesis débiles.")
             ver_anp = st.checkbox("Áreas naturales protegidas", key="ver_anp", disabled=D.anp() is None)
             ver_rango = st.checkbox("Rango conocido (UICN / BirdLife)", key=f"ver_rango_{esp}") if D.rango(esp) else False
 
     r = D.resumen_umbral(esp, modelo, umbral)
+    zonas = D.zonas_predichas(esp, modelo, umbral)
+    candidatas = zonas[~zonas["con_registros"] & (zonas["dentro_m"] | ver_fuera)]
+    nuevas = candidatas.head(C.MAX_ZONAS).reset_index(drop=True)
+    conocidas = zonas[zonas["con_registros"]]
     ui.espacio()
     with st.container(key="panel-resultado"):
         ui.cifra(f"{ui.fmt_km2(r['km2_m'])} km²", f"idóneos dentro de M, el {r['pct_m']:.1f} % de su superficie")
@@ -66,7 +77,8 @@ with ctrl:
             ui.nota(f"De lo idóneo dentro de M, el {en_anp['pct']:.0f} % ({ui.fmt_km2(en_anp['km2'])} km²) cae en un área natural protegida.")
 
 with mapa_col:
-    ui.grafico(G.mapa_idoneidad(esp, modelo, umbral, vista == "binaria", extension, anp=ver_anp, rango=ver_rango),
+    ui.grafico(G.mapa_idoneidad(esp, modelo, umbral, vista == "binaria", extension, anp=ver_anp, rango=ver_rango,
+                                dptos=ver_dptos, zonas=nuevas if ver_zonas else None),
                key="mapa_principal")
     if vista == "binaria":
         ui.leyenda([("barra", VERDE_IDONEO, f"Idóneo (≥ {umbral:.3f})"), ("punto", T["ink"], "Presencia")])
@@ -74,12 +86,60 @@ with mapa_col:
         '<p class="sdm-leyenda" style="margin-top:6px">'
         f'<span><b style="background:transparent;border-top:2px dotted {T["ink"]};height:0;border-radius:0"></b>'
         "Límite del área accesible M: fuera de ella el modelo extrapola</span>"
+        + ('<span><b style="background:transparent;border-top:1px solid rgba(15,26,20,0.42);height:0;border-radius:0"></b>'
+           "Límite departamental</span>" if ver_dptos else "")
+        + (f'<span><i style="background:{T["bg"]};box-shadow:inset 0 0 0 2px {T["accent"]}"></i>'
+           "Zona predicha sin registros (numerada por tamaño)</span>" if ver_zonas else "")
         + ('<span><b style="background:rgba(15,26,20,0.05);box-shadow:inset 0 0 0 1px rgba(15,26,20,0.55)"></b>'
            "Áreas naturales protegidas (SERNANP)</span>" if ver_anp else "")
         + (f'<span><b style="background:transparent;border-top:2px solid {T["accent"]};height:0"></b>'
            "Rango conocido de la especie</span>" if ver_rango else "")
         + "</p>"
     )
+
+# ---------- dónde podría estar ----------
+ui.seccion()
+ui.titulo(
+    "Dónde podría estar la especie",
+    f"La predicción de {C.NOMBRE_MODELO[modelo]} con el umbral {umbral:.3f}: las manchas idóneas que todavía no tienen "
+    "ningún registro son los lugares donde convendría buscarla en campo. Los números coinciden con los del mapa.",
+)
+ui.espacio()
+z1, z2 = st.columns([1.4, 1], gap="large")
+with z1:
+    st.html('<p class="sdm-head" style="font-size:1.375rem">Zonas predichas sin registros</p>')
+    if nuevas.empty:
+        ui.nota("Con este umbral no quedan manchas idóneas sin registros dentro de M. Baja el umbral o incluye las zonas "
+                "fuera de M para ver más candidatas.")
+    else:
+        tabla_z = nuevas.assign(**{
+            "N.º": range(1, len(nuevas) + 1),
+            "Departamento": nuevas["departamentos"],
+            "Superficie (km²)": nuevas["km2"].round(0).astype(int),
+            "Idoneidad máx.": nuevas["idoneidad_max"].round(2),
+            "Lat": nuevas["lat"].round(2), "Lon": nuevas["lon"].round(2),
+            "Ubicación": nuevas["dentro_m"].map({True: "Dentro de M", False: "Fuera de M (extrapola)"}),
+        })[["N.º", "Departamento", "Superficie (km²)", "Idoneidad máx.", "Lat", "Lon", "Ubicación"]]
+        st.dataframe(tabla_z, hide_index=True, width="stretch", height=min(38 * len(tabla_z) + 40, 420))
+        fuera = int((~zonas["con_registros"] & ~zonas["dentro_m"]).sum())
+        ui.nota(f"{len(candidatas)} zonas candidatas"
+                + (f" (aquí las {C.MAX_ZONAS} más grandes)" if len(candidatas) > C.MAX_ZONAS else "")
+                + f" y {len(conocidas)} que ya tienen registros"
+                + (f"; {fuera} más fuera de M quedan ocultas" if fuera and not ver_fuera else "") + ". Lat/Lon es la celda de mayor idoneidad "
+                f"de cada zona. Solo se cuentan manchas de {C.MIN_CELDAS_ZONA} celdas o más (unos {C.MIN_CELDAS_ZONA * 85} km²).")
+with z2:
+    st.html('<p class="sdm-head" style="font-size:1.375rem">Superficie idónea por departamento</p>')
+    por_d = D.idoneo_por_departamento(esp, modelo, umbral)
+    if por_d.empty:
+        ui.nota("Falta la capa de departamentos (capas/departamentos_peru.geojson).")
+    else:
+        st.dataframe(por_d.assign(**{
+            "Idóneo (km²)": por_d["km2"].round(0).astype(int),
+            "% del departamento": por_d["pct_dpto"].round(1),
+            "Registros": por_d["registros"],
+        })[["Departamento", "Idóneo (km²)", "% del departamento", "Registros"]],
+            hide_index=True, width="stretch", height=min(38 * len(por_d) + 40, 420))
+        ui.nota("Un departamento con superficie idónea y sin registros es una predicción a verificar, no una presencia confirmada.")
 
 # ---------- cómo leerlo ----------
 ui.seccion()

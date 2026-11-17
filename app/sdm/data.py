@@ -239,5 +239,153 @@ def idoneo_en_anp(esp: str, modelo: str, umbral: float) -> dict | None:
     return {"km2": dentro, "pct": 100 * dentro / total if total else 0.0}
 
 
+@st.cache_data(show_spinner=False)
+def departamentos() -> dict | None:
+    ruta = C.ARCHIVO_DEPARTAMENTOS
+    return json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else None
+
+
+@st.cache_resource(show_spinner=False)
+def indice_departamentos() -> tuple[np.ndarray, list[str]] | None:
+    """Índice de departamento por celda (-1 fuera del Perú) y la lista de nombres.
+
+    Las celdas de borde que el polígono simplificado deja fuera toman el departamento vecino más cercano."""
+    gj = departamentos()
+    if gj is None:
+        return None
+    from rasterio.features import rasterize
+    from rasterio.transform import from_origin
+
+    g = grilla()
+    nombres = [f["properties"]["nombre"] for f in gj["features"]]
+    t = from_origin(g.lon[0] - g.res / 2, g.lat[0] + g.res / 2, g.res, g.res)
+    formas = [(f["geometry"], i + 1) for i, f in enumerate(gj["features"])]
+    idx = rasterize(formas, out_shape=g.peru.shape, transform=t, fill=0, dtype="int16").astype(int) - 1
+    for _ in range(6):
+        faltan = g.peru & (idx < 0)
+        if not faltan.any():
+            break
+        vecino = idx.copy()
+        for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            corrido = np.roll(np.roll(idx, dy, axis=0), dx, axis=1)
+            vecino = np.where((vecino < 0) & (corrido >= 0), corrido, vecino)
+        idx = np.where(faltan, vecino, idx)
+    idx = np.where(g.peru, idx, -1)
+    return idx, nombres
+
+
+def departamento_en(lat, lon) -> list[str]:
+    """Nombre del departamento de cada punto (por la celda en la que cae)."""
+    ind = indice_departamentos()
+    if ind is None:
+        return [""] * len(lat)
+    idx, nombres = ind
+    g = grilla()
+    f = np.clip(np.round((g.lat[0] - np.asarray(lat)) / g.res).astype(int), 0, len(g.lat) - 1)
+    c = np.clip(np.round((np.asarray(lon) - g.lon[0]) / g.res).astype(int), 0, len(g.lon) - 1)
+    return [nombres[i] if i >= 0 else "" for i in idx[f, c]]
+
+
+def nombres_departamento_grilla() -> np.ndarray | None:
+    """Matriz de texto con el departamento de cada celda (para el texto al pasar el cursor)."""
+    ind = indice_departamentos()
+    if ind is None:
+        return None
+    idx, nombres = ind
+    return np.array(nombres + [""], dtype=object)[idx]
+
+
+def _manchas(mascara: np.ndarray) -> np.ndarray:
+    """Etiqueta las manchas conectadas (8 vecinos) de una máscara booleana; 0 = fondo."""
+    etiquetas = np.zeros(mascara.shape, dtype=int)
+    alto, ancho = mascara.shape
+    n = 0
+    for f0, c0 in zip(*np.nonzero(mascara)):
+        if etiquetas[f0, c0]:
+            continue
+        n += 1
+        pila = [(f0, c0)]
+        etiquetas[f0, c0] = n
+        while pila:
+            f, c = pila.pop()
+            for df in (-1, 0, 1):
+                for dc in (-1, 0, 1):
+                    ff, cc = f + df, c + dc
+                    if 0 <= ff < alto and 0 <= cc < ancho and mascara[ff, cc] and not etiquetas[ff, cc]:
+                        etiquetas[ff, cc] = n
+                        pila.append((ff, cc))
+    return etiquetas
+
+
+@st.cache_data(show_spinner=False)
+def zonas_predichas(esp: str, modelo: str, umbral: float) -> pd.DataFrame:
+    """Manchas de celdas idóneas: dónde el modelo predice que podría estar la especie.
+
+    Cada zona se resume en su celda de mayor idoneidad. "Con registros" indica si ya hay una presencia
+    dentro o pegada a la mancha; las que no tienen son las candidatas para buscar a la especie en campo."""
+    g = grilla()
+    mapa = idoneidad(esp, modelo)
+    idoneo = np.isfinite(mapa) & (mapa >= umbral) & g.peru
+    etiquetas = _manchas(idoneo)
+    m = area_m(esp)
+    p = presencias(esp)
+    fp = np.clip(np.round((g.lat[0] - p["decimalLatitude"].to_numpy()) / g.res).astype(int), 0, len(g.lat) - 1)
+    cp = np.clip(np.round((p["decimalLongitude"].to_numpy() - g.lon[0]) / g.res).astype(int), 0, len(g.lon) - 1)
+    con_registro = set()
+    for f, c in zip(fp, cp):  # la presencia cuenta para la mancha si cae en ella o en una celda vecina
+        vecinas = etiquetas[max(f - 1, 0):f + 2, max(c - 1, 0):c + 2]
+        con_registro.update(int(v) for v in np.unique(vecinas) if v)
+    ind = indice_departamentos()
+    filas = []
+    for k in range(1, etiquetas.max() + 1):
+        celdas = etiquetas == k
+        n = int(celdas.sum())
+        if n < C.MIN_CELDAS_ZONA:
+            continue
+        valores = np.where(celdas, mapa, -np.inf)
+        f, c = np.unravel_index(np.argmax(valores), mapa.shape)
+        if ind is not None:
+            idx, nombres = ind
+            cuenta = pd.Series(idx[celdas]).value_counts()
+            cuenta = cuenta[cuenta.index >= 0]
+            dptos = [nombres[i] for i in cuenta.index]
+        else:
+            dptos = []
+        filas.append({
+            "zona": k, "lon": float(g.lon[c]), "lat": float(g.lat[f]), "celdas": n,
+            "km2": float(g.km2[celdas].sum()), "idoneidad_max": float(mapa[f, c]),
+            "idoneidad_media": float(np.nanmean(mapa[celdas])),
+            "departamento": dptos[0] if dptos else "", "departamentos": ", ".join(dptos),
+            "con_registros": k in con_registro, "dentro_m": bool((celdas & m).any()),
+        })
+    cols = ["zona", "lon", "lat", "celdas", "km2", "idoneidad_max", "idoneidad_media", "departamento", "departamentos",
+            "con_registros", "dentro_m"]
+    return pd.DataFrame(filas, columns=cols).sort_values("km2", ascending=False).reset_index(drop=True)
+
+
+@st.cache_data(show_spinner=False)
+def idoneo_por_departamento(esp: str, modelo: str, umbral: float) -> pd.DataFrame:
+    """Superficie idónea por departamento, con las presencias que ya hay en cada uno."""
+    ind = indice_departamentos()
+    if ind is None:
+        return pd.DataFrame()
+    idx, nombres = ind
+    g = grilla()
+    mapa = idoneidad(esp, modelo)
+    idoneo = np.isfinite(mapa) & (mapa >= umbral) & (idx >= 0)
+    p = presencias(esp)
+    regs = pd.Series(departamento_en(p["decimalLatitude"], p["decimalLongitude"])).value_counts()
+    filas = []
+    for i, nombre in enumerate(nombres):
+        en_d = idx == i
+        km2 = float(g.km2[idoneo & en_d].sum())
+        n_reg = int(regs.get(nombre, 0))
+        if km2 == 0 and n_reg == 0:
+            continue
+        filas.append({"Departamento": nombre, "km2": km2, "pct_dpto": 100 * km2 / float(g.km2[en_d].sum()),
+                      "idoneidad_max": float(np.nanmax(np.where(en_d, mapa, np.nan))), "registros": n_reg})
+    return pd.DataFrame(filas).sort_values("km2", ascending=False).reset_index(drop=True)
+
+
 def hay_resultados() -> bool:
     return C.DIR_RASTERS.exists() and any(C.DIR_RASTERS.glob("*.tif")) and (C.DIR_MODELOS / "resultados_por_pliegue.csv").exists()

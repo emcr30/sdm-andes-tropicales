@@ -8,3 +8,9 @@ worldclim_raw/
 # archivos temporales de Colab
 .ipynb_checkpoints/
 __pycache__/
+
+# documentos personales y archivos del sistema: nunca a GitHub
+tesis/
+*.pdf
+*.docx
+.DS_Store

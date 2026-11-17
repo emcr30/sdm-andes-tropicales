@@ -74,7 +74,16 @@ Para cambiar una foto, reemplaza el archivo en `static/img/` y actualiza su auto
 
 ## Capas de referencia del mapa
 
-En la página Mapa hay dos casillas, apagadas por defecto:
+En todos los mapas se dibujan los **departamentos del Perú** (`capas/departamentos_peru.geojson`, de Natural Earth 1:10m,
+dominio público, simplificados a ~1 km; Lima Metropolitana está unida a Lima). Al pasar el cursor sobre el mapa de idoneidad
+se ve el departamento de cada celda.
+
+La página Mapa también muestra la **predicción de dónde podría estar la especie**: las manchas de celdas idóneas
+(sobre el umbral) que no tienen ningún registro se marcan con círculos numerados y se listan en la tabla
+"Zonas predichas sin registros", junto con la superficie idónea por departamento. Por defecto solo aparecen las zonas
+dentro de M; la casilla "Incluir zonas fuera de M" agrega las extrapoladas, atenuadas.
+
+Además hay dos casillas, apagadas por defecto:
 
 - **Áreas naturales protegidas**: `capas/anp_sernanp.geojson`, descargado del geoservidor del SERNANP
   (`geoservicios.sernanp.gob.pe`, servicio `servicio_descarga`: ANP nacionales, zonas reservadas y áreas de conservación

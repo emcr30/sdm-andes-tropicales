@@ -20,6 +20,8 @@ DIR_FIGURAS = RESULTADOS / "figures"
 # Capas de referencia (no salen del notebook): ANP del SERNANP y, si se agregan, rangos conocidos por especie
 DIR_CAPAS = RAIZ / "capas"
 ARCHIVO_ANP = DIR_CAPAS / "anp_sernanp.geojson"
+# Límites departamentales (Natural Earth 1:10m, dominio público), simplificados a ~1 km
+ARCHIVO_DEPARTAMENTOS = DIR_CAPAS / "departamentos_peru.geojson"
 DIR_RANGOS = DIR_CAPAS / "rangos"  # <Especie>.geojson, p. ej. Xenoglaux_loweryi.geojson (UICN / BirdLife)
 
 # Parámetros del estudio (celda 0.3 del notebook)
@@ -28,6 +30,9 @@ DISTANCIA_MIN_KM = 5
 UMBRAL_PEARSON = 0.7
 UMBRAL_VIF = 5
 RADIO_TIERRA_KM = 6371.0088
+# Zonas predichas: manchas idóneas de al menos este tamaño (celdas de ~9 km) se marcan en el mapa
+MIN_CELDAS_ZONA = 2
+MAX_ZONAS = 15  # en el mapa y la tabla solo las más grandes, para que los números se lean
 
 ESPECIES = {
     "Xenoglaux_loweryi": {
