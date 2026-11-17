@@ -44,31 +44,6 @@ def _contorno_m(fig, esp, **kw):
                              name="Área accesible M", showlegend=False), **kw)
 
 
-GRIS_INALCANZABLE = "rgba(77,88,81,0.38)"
-
-
-def _capa_inalcanzable(fig, esp, mapa, umbral):
-    """Celdas idóneas por clima pero fuera del área alcanzable: se pintan en gris, no como predicción."""
-    g = D.grilla()
-    fuera = np.isfinite(mapa) & (mapa >= umbral) & g.peru & ~D.area_alcanzable(esp)
-    if not fuera.any():
-        return
-    fig.add_trace(go.Heatmap(z=np.where(fuera, 1.0, np.nan), x=g.lon, y=g.lat, showscale=False,
-                             colorscale=[[0, GRIS_INALCANZABLE], [1, GRIS_INALCANZABLE]], customdata=mapa,
-                             hovertemplate="Clima adecuado (idoneidad %{customdata:.2f}) pero fuera del área alcanzable"
-                                           "<br>Lat %{y:.2f}° · Lon %{x:.2f}°<extra></extra>", name="inalcanzable"))
-
-
-def _contorno_alcanzable(fig, esp):
-    """Borde del área alcanzable, solo si es más pequeña que M (p. ej. las cuencas de la rana)."""
-    gj = D.alcanzable_geojson(esp)
-    if gj is None:
-        return
-    xs, ys, _ = _anillos(gj)
-    fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color=T["ink"], width=1.8), hoverinfo="skip",
-                             name="Área alcanzable", showlegend=False))
-
-
 def _presencias(fig, esp, size=8, **kw):
     p = D.presencias(esp)
     fig.add_trace(go.Scatter(
@@ -161,12 +136,9 @@ def _zonas_predichas(fig, zonas: pd.DataFrame):
 
 
 def mapa_idoneidad(esp: str, modelo: str, umbral: float, binario: bool, vista: str, alto: int = 640,
-                   anp: bool = False, rango: bool = False, dptos: bool = True, zonas: pd.DataFrame | None = None,
-                   restringir: bool = True):
+                   anp: bool = False, rango: bool = False, dptos: bool = True, zonas: pd.DataFrame | None = None):
     g = D.grilla()
-    mapa_todo = D.idoneidad(esp, modelo)
-    # Restricción a posteriori (Mendes et al. 2020): fuera de lo alcanzable no se muestra como predicción
-    mapa = np.where(D.area_alcanzable(esp), mapa_todo, np.nan) if restringir else mapa_todo
+    mapa = D.idoneidad(esp, modelo)
     fig = go.Figure()
     elev = _capa_relieve(fig)
     elev_c = np.where(np.isfinite(elev), elev, np.nan) if elev is not None else np.full_like(mapa, np.nan)
@@ -189,8 +161,6 @@ def mapa_idoneidad(esp: str, modelo: str, umbral: float, binario: bool, vista: s
                                                tickfont=dict(size=11, color=T["muted"])),
                                  hovertemplate="<b>%{customdata[1]}</b><br>Idoneidad %{z:.2f}<br>Elevación %{customdata[0]:,.0f} m"
                                                "<br>Lat %{y:.2f}° · Lon %{x:.2f}°<extra></extra>", name="idoneidad"))
-    if restringir:
-        _capa_inalcanzable(fig, esp, mapa_todo, umbral)
     ext = D.extension(D.area_m(esp), 0.9) if vista == "M" else D.extension(g.peru, 0.3)
     if dptos:
         _capa_departamentos(fig, ext, tam=11 if vista == "M" else 9)
@@ -199,7 +169,6 @@ def mapa_idoneidad(esp: str, modelo: str, umbral: float, binario: bool, vista: s
     if rango:
         _capa_rango(fig, esp)
     _contorno_m(fig, esp)
-    _contorno_alcanzable(fig, esp)
     if zonas is not None:
         _zonas_predichas(fig, zonas)
     _presencias(fig, esp, size=9)
@@ -208,14 +177,11 @@ def mapa_idoneidad(esp: str, modelo: str, umbral: float, binario: bool, vista: s
     return fig
 
 
-def mini_mapa(esp: str, modelo: str, umbral: float, binario: bool, restringir: bool = True):
+def mini_mapa(esp: str, modelo: str, umbral: float, binario: bool):
     g = D.grilla()
-    mapa_todo = D.idoneidad(esp, modelo)
-    mapa = np.where(D.area_alcanzable(esp), mapa_todo, np.nan) if restringir else mapa_todo
+    mapa = D.idoneidad(esp, modelo)
     fig = go.Figure()
     _capa_relieve(fig)
-    if restringir:
-        _capa_inalcanzable(fig, esp, mapa_todo, umbral)
     if binario:
         z = np.where(np.isfinite(mapa) & (mapa >= umbral), 1.0, np.nan)
         fig.add_trace(go.Heatmap(z=z, x=g.lon, y=g.lat, colorscale=[[0, VERDE_IDONEO], [1, VERDE_IDONEO]], showscale=False, hoverinfo="skip"))
@@ -225,7 +191,6 @@ def mini_mapa(esp: str, modelo: str, umbral: float, binario: bool, restringir: b
     ext = D.extension(D.area_m(esp), 0.9)
     _capa_departamentos(fig, ext, tam=9)
     _contorno_m(fig, esp)
-    _contorno_alcanzable(fig, esp)
     _presencias(fig, esp, size=5)
     _ejes_geo(fig, ext, ticks=False)
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)

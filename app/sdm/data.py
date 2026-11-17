@@ -173,38 +173,6 @@ def area_m(esp: str) -> np.ndarray:
     return m
 
 
-@st.cache_data(show_spinner=False)
-def area_alcanzable(esp: str) -> np.ndarray:
-    """Lo que la especie puede alcanzar: M recortada a sus cuencas si hay capa (capas/alcanzable/<Especie>.geojson).
-
-    La predicción se restringe a esta área a posteriori (Barve et al. 2011; Mendes et al. 2020):
-    fuera de ella el clima puede ser adecuado, pero la especie no llega."""
-    m = area_m(esp)
-    ruta = C.DIR_ALCANZABLE / f"{esp}.geojson"
-    if not ruta.exists():
-        return m
-    from rasterio.features import rasterize
-    from rasterio.transform import from_origin
-
-    g = grilla()
-    gj = json.loads(ruta.read_text(encoding="utf-8"))
-    t = from_origin(g.lon[0] - g.res / 2, g.lat[0] + g.res / 2, g.res, g.res)
-    cuencas = rasterize([(f["geometry"], 1) for f in gj["features"]], out_shape=g.peru.shape, transform=t, fill=0,
-                        dtype="uint8", all_touched=True).astype(bool)
-    return m & cuencas
-
-
-def alcanzable_geojson(esp: str) -> dict | None:
-    ruta = C.DIR_ALCANZABLE / f"{esp}.geojson"
-    return json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else None
-
-
-def celdas_idoneas(esp: str, modelo: str, umbral: float, restringir: bool) -> np.ndarray:
-    mapa = idoneidad(esp, modelo)
-    i = np.isfinite(mapa) & (mapa >= umbral) & grilla().peru
-    return i & area_alcanzable(esp) if restringir else i
-
-
 def extension(mascara: np.ndarray, margen: float = 0.6):
     g = grilla()
     filas, cols = np.nonzero(mascara)
@@ -229,8 +197,6 @@ def resumen_umbral(esp: str, modelo: str, umbral: float) -> dict:
         "pct_m": 100 * float(np.nanmean(mapa[m] >= umbral)) if m.any() else 0.0,
         "pct_peru": 100 * float(np.nanmean(mapa[g.peru] >= umbral)),
         "km2_total_m": float(g.km2[m].sum()),
-        "km2_alc": float(g.km2[idoneo & area_alcanzable(esp)].sum()),
-        "km2_total_alc": float(g.km2[area_alcanzable(esp)].sum()),
     }
 
 
@@ -352,14 +318,15 @@ def _manchas(mascara: np.ndarray) -> np.ndarray:
 
 
 @st.cache_data(show_spinner=False)
-def zonas_predichas(esp: str, modelo: str, umbral: float, restringir: bool = True) -> pd.DataFrame:
+def zonas_predichas(esp: str, modelo: str, umbral: float) -> pd.DataFrame:
     """Manchas de celdas idóneas: dónde el modelo predice que podría estar la especie.
 
     Cada zona se resume en su celda de mayor idoneidad. "Con registros" indica si ya hay una presencia
     dentro o pegada a la mancha; las que no tienen son las candidatas para buscar a la especie en campo."""
     g = grilla()
     mapa = idoneidad(esp, modelo)
-    etiquetas = _manchas(celdas_idoneas(esp, modelo, umbral, restringir))
+    idoneo = np.isfinite(mapa) & (mapa >= umbral) & g.peru
+    etiquetas = _manchas(idoneo)
     m = area_m(esp)
     p = presencias(esp)
     fp = np.clip(np.round((g.lat[0] - p["decimalLatitude"].to_numpy()) / g.res).astype(int), 0, len(g.lat) - 1)
@@ -397,7 +364,7 @@ def zonas_predichas(esp: str, modelo: str, umbral: float, restringir: bool = Tru
 
 
 @st.cache_data(show_spinner=False)
-def idoneo_por_departamento(esp: str, modelo: str, umbral: float, restringir: bool = True) -> pd.DataFrame:
+def idoneo_por_departamento(esp: str, modelo: str, umbral: float) -> pd.DataFrame:
     """Superficie idónea por departamento, con las presencias que ya hay en cada uno."""
     ind = indice_departamentos()
     if ind is None:
@@ -405,13 +372,13 @@ def idoneo_por_departamento(esp: str, modelo: str, umbral: float, restringir: bo
     idx, nombres = ind
     g = grilla()
     mapa = idoneidad(esp, modelo)
-    sel = celdas_idoneas(esp, modelo, umbral, restringir) & (idx >= 0)
+    idoneo = np.isfinite(mapa) & (mapa >= umbral) & (idx >= 0)
     p = presencias(esp)
     regs = pd.Series(departamento_en(p["decimalLatitude"], p["decimalLongitude"])).value_counts()
     filas = []
     for i, nombre in enumerate(nombres):
         en_d = idx == i
-        km2 = float(g.km2[sel & en_d].sum())
+        km2 = float(g.km2[idoneo & en_d].sum())
         n_reg = int(regs.get(nombre, 0))
         if km2 == 0 and n_reg == 0:
             continue

@@ -22,16 +22,7 @@ DIR_CAPAS = RAIZ / "capas"
 ARCHIVO_ANP = DIR_CAPAS / "anp_sernanp.geojson"
 # Límites departamentales (Natural Earth 1:10m, dominio público), simplificados a ~1 km
 ARCHIVO_DEPARTAMENTOS = DIR_CAPAS / "departamentos_peru.geojson"
-DIR_RANGOS = DIR_CAPAS / "rangos"
-# Área alcanzable (restricción a posteriori, Mendes et al. 2020): <Especie>.geojson. Sin archivo, lo alcanzable es M.
-DIR_ALCANZABLE = DIR_CAPAS / "alcanzable"
-ALCANZABLE = {
-    "Telmatobius_macrostomus": (
-        "Subcuencas con registros (HydroBASINS nivel 8: lago Junín y alto Mantaro). Es una rana completamente acuática: "
-        "no cruza la cordillera ni pasa de una cuenca a otra, así que el radio de 100 km sobreestima lo que puede alcanzar."
-    ),
-}
-TEXTO_ALCANZABLE_M = "El área accesible M (100 km alrededor de las presencias): un ave puede recorrer esa distancia."  # <Especie>.geojson, p. ej. Xenoglaux_loweryi.geojson (UICN / BirdLife)
+DIR_RANGOS = DIR_CAPAS / "rangos"  # <Especie>.geojson, p. ej. Xenoglaux_loweryi.geojson (UICN / BirdLife)
 
 # Parámetros del estudio (celda 0.3 del notebook)
 RADIO_M_KM = 100
